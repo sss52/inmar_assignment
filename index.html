@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Assignment</title>
+<link rel="stylesheet" media="all" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
+</head>
+<body> 
+ <div class="global-wrapper" ng-app="myApp"> 
+<div ng-show="!loginPage">
+  <!-- nav section -->
+  <nav class="navbar navbar-default" ng-controller="navCtrl">
+    <div class="container-fluid">
+      <div class="nav-header">
+        <a href="#" class="navbar-brand hidden-xs">Assignment</a>
+        <ul class="nav navbar-nav">
+          <li ng-repeat="navLink in nav.navItems" ng-class="{active : $index === nav.selectedIndex}">
+            <a class="text-center" ng-click="nav.navClick($index)" ng-href="#/{{navLink}}" ng-click="goTo(navLink)">{{navLink}}</a>
+          </li>
+        </ul>
+    	</div>
+    </div>
+  </nav>
+  <div class="container"  ng-controller="homeCtrl" ng-show="contact_show">
+    <div class="row panel panel-primary" >
+      <div class="panel-heading">
+        <h2 class="panel-title">Contact List</h2>
+      </div>
+      <!--     contact list   	 -->
+      <div class="col-xs-5 panel-body" >
+        <ul class="list-group">
+          <li class="list-group-item"> <h4>Contacts:</h4>
+            <input class="form-control" placeholder="Seach Your Contacts" type="text" ng-model="searchText">
+            <contact class="list-group-item" ng-repeat="contact in contacts | orderBy: 'name' | filter: searchText "></contact>
+          </li>
+        </ul> 
+      </div>
+      
+      <!--   ng-view below       -->
+      <div class="col-xs-7">
+        <div class="list-group panel-body">
+          <div ng-view></div>
+        </div>
+      </div>
+        
+    </div>
+  </div>
+  <div class="container"  ng-controller="groupCtrl"  ng-show="group_show">
+    <div class="row panel panel-primary" >
+      <div class="panel-heading">
+        <h2 class="panel-title">Group List</h2>
+      </div>
+      <!--     contact list   	 -->
+      <div class="col-xs-5 panel-body">
+        <ul class="list-group">
+          <li class="list-group-item"> <h4>Groups:</h4>
+            <input class="form-control" placeholder="Seach Your Groups" type="text" ng-model="searchText">
+            <group class="list-group-item" ng-repeat="group in groups | orderBy: 'name' | filter: searchText "></group>
+			
+          </li>
+        </ul> 
+      </div>
+      <!--   ng-view below       -->
+      <div class="col-xs-7">
+        <div class="list-group panel-body">
+          <div ng-view></div>
+        </div>
+      </div> 
+    </div>
+  </div>
+</div>
+    <!--  html templates used by angular, usually in separate files -->
+    <script type="text/ng-template" id="default.html">
+      <div class="alert alert-success text-center" ng-class="{hidden : !removed}"> {{removed}}</div>
+      <div class="list-group-item text-center">Please select a contact to view</div>
+    </script>
+
+	  <!-- 	template for displaying a contacts info	 -->
+    <script type="text/ng-template" id="contact_info.html">
+      <div class="list-group-item">
+        <h3 class="text-center">{{currentContact.name}}</h3>
+        <p>email: <a ng-href="{{currentContact.email}}">{{currentContact.email}}</a></p>
+        <p>phone: {{currentContact.phone}}</p>
+        <p>url: <a ng-href="{{currentContact.url}}">{{currentContact.url}}</a></p>
+        <p>Notes:</p>
+        <p class="well well-lg">{{currentContact.notes}}</p>
+
+        <a ng-href="#/edit/{{contacts.indexOf(currentContact)}}">
+          <button class="btn btn-default">
+            <span class="glyphicon glyphicon-pencil"></span><span> - Edit</span>
+          </button>
+        </a>
+
+        <a href="#/edit/{{contacts.indexOf(currentContact)}}">
+		<button class="btn btn-default" ng-click="removeContact(currentContact)">
+          <span class="glyphicon glyphicon-remove"></span><span> - Remove</span>
+        </button>
+		</a>
+      </div>
+    </script>
+
+<!--   template used for both adding a new contact and editing an existing contact   -->
+    <script type="text/ng-template" id="contact_form.html">
+      <div ng-controller="addContactCtrl">
+        <div class="list-group-item">
+
+          <div class="form-group">
+  
+            <p><label for="name">name: </label> <input id="name" class="form-control" type="text" ng-model="currentContact.name"> </p>
+            <p><label for="email">email:</label> <input id="email" class="form-control" type="text" ng-model="currentContact.email"> </p>
+            <p><label for="phone">phone:</label> <input id="phone" class="form-control" type="text" ng-model="currentContact.phone"> </p>
+            <p><label for="url">url:</label> <input id="url" class="form-control" type="text" ng-model="currentContact.url"> </p>
+            <p><label for="notes">notes:</label></p>
+            <textarea class="form-control" id="notes" rows="3" ng-model="currentContact.notes"></textarea>
+          </div>
+        
+          <a ng-if="path === '/add' " ng-href="#/contact-info/{{ contacts.length - 1 }}" ng-click="addContact()">
+            <button class="btn btn-default">
+             <span class="glyphicon glyphicon-ok"></span>
+             <span> Add</span>
+            </button>
+          </a>
+
+          <a ng-if="path !== '/add'" ng-href="#/contact-info/{{index}}">
+            <button class="btn btn-default">
+             <span class="glyphicon glyphicon-ok"></span>
+             <span> Save Edits</span>
+            </button>
+          </a>
+        </div>
+      </div>
+    </script>
+
+<!--      template used for the ng-repeat in the contact list        -->
+    <script type="text/ng-template" id="contact.html">
+      <a ng-href="#/contact-info/{{contacts.indexOf(contact)}}">
+        {{contact.name}}
+      </a>
+    </script>	
+<!--   display info of Group   -->	
+	<script type="text/ng-template" id="group_info.html">
+      <div class="list-group-item">
+        <h3 class="text-center">{{currentGroup.name}}</h3>
+        <p>Notes:</p>
+        <p class="well well-lg">{{currentGroup.notes}}</p>
+
+        <a ng-href="#/edit-group/{{groups.indexOf(currentGroup)}}">
+          <button class="btn btn-default">
+            <span class="glyphicon glyphicon-pencil"></span><span> - Edit</span>
+          </button>
+        </a>
+		  <a href="#/edit-group/{{contacts.indexOf(currentGroup)}}">
+		<button class="btn btn-default" ng-click="removeContact(currentGroup)">
+          <span class="glyphicon glyphicon-remove"></span><span> - Remove</span>
+        </button>
+		</a>
+      </div>
+    </script>
+<!--   template used for both adding a new Group and editing an existing Group   -->
+    <script type="text/ng-template" id="group_form.html">
+      <div ng-controller="addGroupCtrl">
+        <div class="list-group-item">
+
+          <div class="form-group">
+  
+            <p><label for="name">name: </label> <input id="name" class="form-control" type="text" ng-model="currentGroup.name"> </p>
+            <p><label for="notes">notes:</label></p>
+            <textarea class="form-control" id="notes" rows="3" ng-model="currentGroup.notes"></textarea>
+          </div>
+        
+          <a ng-if="path === '/add-group' " ng-href="#/group-info/{{ groups.length - 1 }}" ng-click="addGroup()">
+            <button class="btn btn-default">
+             <span class="glyphicon glyphicon-ok"></span>
+             <span> Add Group</span>
+            </button>
+          </a>
+
+          <a ng-if="path !== '/add-group'" ng-href="#/group-info/{{index}}">
+            <button class="btn btn-default">
+             <span class="glyphicon glyphicon-ok"></span>
+             <span> Save Edits</span>
+            </button>
+          </a>
+
+        </div>
+      </div>
+    </script>
+<!--      template used for the ng-repeat in the group list        -->
+    <script type="text/ng-template" id="group.html">
+      <a ng-href="#/group-info/{{groups.indexOf(group)}}">
+        {{group.name}}
+      </a>
+    </script>
+	
+ <!--     login  Start   -->   
+    <div class="col-md-12" ng-show="loginPage" ng-controller="loginCtrl">
+      <div class="page-header">
+        <h1>{{ title }}</h1>
+      </div>  
+      <form ng-submit="formSubmit()" class="form">
+        <div class="col-md-4">
+          <div class="form-group">
+            <input type="text"  pattern=".+@inmar.com"  class="form-control" ng-model="username" placeholder="username" required=""/>
+          </div> 
+
+          <div class="form-group">
+            <input type="password" class="form-control" ng-model="password" placeholder="password" required=""/>
+          </div>
+
+          <div class="form-group">
+            <button type="submit" class="btn btn-success">Login</button>
+            <span class="text-danger">{{ error }}</span>
+          </div>
+        </div>
+      </form>
+    </div> 
+</div>
+<script type="application/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.min.js"></script>
+<script type="application/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular-route.min.js"></script>
+<script type="application/javascript" src="custom.js"></script>
+</body>
+</html>
